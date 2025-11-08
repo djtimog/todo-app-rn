@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as todos from "../todos.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -22,16 +23,14 @@ import type {
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-declare const fullApi: ApiFromModules<{}>;
-declare const fullApiWithMounts: typeof fullApi;
-
+declare const fullApi: ApiFromModules<{
+  todos: typeof todos;
+}>;
 export declare const api: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "public">
 >;
 export declare const internal: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "internal">
 >;
-
-export declare const components: {};
