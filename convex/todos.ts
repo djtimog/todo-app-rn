@@ -1,19 +1,28 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-export const getTodos = query({
-  handler: async (ctx) => {
-    const todos = await ctx.db.query("todos").order("desc").collect();
+export const getTodosByUserId = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const todos = await ctx.db
+      .query("todos")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .collect();
+
     return todos;
   },
 });
 
 export const addTodo = mutation({
-  args: { text: v.string() },
+  args: { text: v.string(), userId: v.string() },
   handler: async (ctx, args) => {
     const todoId = await ctx.db.insert("todos", {
       text: args.text,
       isCompleted: false,
+      userId: args.userId,
     });
 
     return todoId;
@@ -43,6 +52,7 @@ export const updateTodo = mutation({
   args: {
     id: v.id("todos"),
     text: v.string(),
+    dueDate: v.number(),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, {
@@ -55,7 +65,6 @@ export const clearAllTodos = mutation({
   handler: async (ctx) => {
     const todos = await ctx.db.query("todos").collect();
 
-    // Delete all todos
     for (const todo of todos) {
       await ctx.db.delete(todo._id);
     }
